@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -27,11 +28,13 @@ import 'storage.dart';
 import 'user_model.dart';
 
 void main() async {
-  final FirebaseStorage storage = await initStorage(STORAGE_BUCKET);
-  final FirebaseStorage autoMlStorage = await initStorage(AUTOML_BUCKET);
+  // final FirebaseStorage storage = await initStorage(STORAGE_BUCKET);
+  // final FirebaseStorage autoMlStorage = await initStorage(AUTOML_BUCKET);
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(new MyApp(
-    storage: storage,
-    autoMlStorage: autoMlStorage,
+    // storage: storage,
+    // autoMlStorage: autoMlStorage,
     userModel: UserModel(),
   ));
 }
@@ -39,14 +42,14 @@ void main() async {
 enum MainAction { logout, viewTutorial }
 
 class MyApp extends StatelessWidget {
-  final FirebaseStorage storage;
-  final FirebaseStorage autoMlStorage;
+  // final FirebaseStorage storage;
+  // final FirebaseStorage autoMlStorage;
   final UserModel userModel;
 
   const MyApp({
     Key key,
-    @required this.storage,
-    @required this.autoMlStorage,
+    // @required this.storage,
+    // @required this.autoMlStorage,
     @required this.userModel,
   }) : super(key: key);
 
@@ -55,8 +58,8 @@ class MyApp extends StatelessWidget {
     return ScopedModel<UserModel>(
       model: userModel,
       child: new InheritedStorage(
-        storage: storage,
-        autoMlStorage: autoMlStorage,
+        // storage: storage,
+        // autoMlStorage: autoMlStorage,
         child: new MaterialApp(
           title: 'Custom Image Classifier',
           theme: new ThemeData(
@@ -106,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final model = ScopedModel.of<UserModel>(context, rebuildOnChange: true);
-    final query = Firestore.instance.collection('datasets');
+    final query = FirebaseFirestore.instance.collection('datasets');
 
     return new Scaffold(
       key: _scaffoldKey,
