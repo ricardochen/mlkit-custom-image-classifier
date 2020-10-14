@@ -45,10 +45,15 @@ class UserModel extends Model {
 
   void attemptSilentSignIn() async {
     print("Attempting silent sign in");
-    GoogleSignInAccount googleUser = await _googleSignIn.signInSilently();
-    if (googleUser != null) {
-      User user = await completeSignIn(googleUser);
-      setLoggedInUser(user);
+    try {
+      GoogleSignInAccount googleUser = await _googleSignIn.signInSilently();
+      if (googleUser != null) {
+        User user = await completeSignIn(googleUser);
+        setLoggedInUser(user);
+      }
+    } catch (error) {
+      print("ERROR");
+      print(error);
     }
   }
 
@@ -73,8 +78,12 @@ class UserModel extends Model {
 
   /// begins the sign in flow
   Future<User> beginSignIn() async {
-    GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    return completeSignIn(googleUser);
+    try {
+      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      return completeSignIn(googleUser);
+    } catch (error) {
+      print(error);
+    }
   }
 
   User get user => _user;
