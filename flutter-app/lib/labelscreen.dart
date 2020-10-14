@@ -123,10 +123,10 @@ class _ListLabelsScreenState extends State<ListLabelsScreen> {
 
       // set the token on dataset so that it can be notfied when training completes
       final token = await _firebaseMessaging.getToken();
-      await Firestore.instance
+      await FirebaseFirestore.instance
           .collection('datasets')
-          .document(widget.dataset.id)
-          .setData({"token": token}, merge: true);
+          .doc(widget.dataset.id)
+          .set({"token": token}, SetOptions(merge: true));
     } catch (err) {
       showSnackBar("Error while starting training");
       print("Error $err");
@@ -202,11 +202,11 @@ class _ListLabelsScreenState extends State<ListLabelsScreen> {
         }
         return;
       case Actions.changeVisiblity:
-        Firestore.instance
+        FirebaseFirestore.instance
             .collection('datasets')
-            .document(widget.dataset.id)
-            .setData({"isPublic": !widget.dataset.isPublic},
-                merge: true).whenComplete(() {
+            .doc(widget.dataset.id)
+            .set({"isPublic": !widget.dataset.isPublic},
+                SetOptions(merge: true)).whenComplete(() {
           Navigator.pop(context);
         });
         return;
@@ -235,38 +235,38 @@ class _ListLabelsScreenState extends State<ListLabelsScreen> {
     return PopupMenuButton<Actions>(
       onSelected: onPopupMenuItemClicked,
       itemBuilder: (BuildContext context) => <PopupMenuEntry<Actions>>[
-            const PopupMenuItem(
-              child: Text('Train model'),
-              value: Actions.trainModel,
-            ),
-            const PopupMenuItem(
-              child: Text('View Collaborators'),
-              value: Actions.viewCollaborators,
-            ),
-            const PopupMenuItem(
-              child: Text('View Past Operations'),
-              value: Actions.viewPastOperations,
-            ),
-            PopupMenuItem(
-              child: widget.dataset.isPublic
-                  ? Text('Make private')
-                  : Text('Make public'),
-              value: Actions.changeVisiblity,
-            ),
-            const PopupMenuItem(
-              child: Text('Export to Firebase'),
-              value: Actions.exportToFirebase,
-            ),
-            const PopupMenuItem(
-              child: Text('Show bucket path'),
-              value: Actions.copyGCSPath,
-            ),
-            const PopupMenuDivider(),
-            const PopupMenuItem(
-              child: Text('Delete Dataset'),
-              value: Actions.deleteDataset,
-            ),
-          ],
+        const PopupMenuItem(
+          child: Text('Train model'),
+          value: Actions.trainModel,
+        ),
+        const PopupMenuItem(
+          child: Text('View Collaborators'),
+          value: Actions.viewCollaborators,
+        ),
+        const PopupMenuItem(
+          child: Text('View Past Operations'),
+          value: Actions.viewPastOperations,
+        ),
+        PopupMenuItem(
+          child: widget.dataset.isPublic
+              ? Text('Make private')
+              : Text('Make public'),
+          value: Actions.changeVisiblity,
+        ),
+        const PopupMenuItem(
+          child: Text('Export to Firebase'),
+          value: Actions.exportToFirebase,
+        ),
+        const PopupMenuItem(
+          child: Text('Show bucket path'),
+          value: Actions.copyGCSPath,
+        ),
+        const PopupMenuDivider(),
+        const PopupMenuItem(
+          child: Text('Delete Dataset'),
+          value: Actions.deleteDataset,
+        ),
+      ],
     );
   }
 
@@ -482,10 +482,10 @@ class LabelEntry extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (context) => new ListLabelSamples(
-                                dataset,
-                                labelKey,
-                                labelName,
-                              ),
+                            dataset,
+                            labelKey,
+                            labelName,
+                          ),
                         ),
                       );
                     }

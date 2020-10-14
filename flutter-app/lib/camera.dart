@@ -249,7 +249,7 @@ class _CameraState extends State<Camera> {
       await Firestore.instance.runTransaction((Transaction tx) async {
         DocumentSnapshot snapshot = await tx.get(labelRef);
         await tx.update(labelRef, <String, dynamic>{
-          'total_images': snapshot.data['total_images'] + 1
+          'total_images': snapshot.data()['total_images'] + 1
         });
       });
     }

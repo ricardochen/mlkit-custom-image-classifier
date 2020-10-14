@@ -25,7 +25,7 @@ class CollaboratorsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final query = Firestore.instance
+    final query = FirebaseFirestore.instance
         .collection('collaborators')
         .where("parent_key", isEqualTo: dataset.id);
 
@@ -60,7 +60,7 @@ class CollaboratorsPage extends StatelessWidget {
               case ConnectionState.waiting:
                 return Center(child: CircularProgressIndicator());
               default:
-                if (snapshot.data.documents.isEmpty) {
+                if (snapshot.data.docs.isEmpty) {
                   return ZeroState(this.dataset.name);
                 }
 
@@ -161,9 +161,9 @@ class _InviteUserAlertDialogState extends State<InviteUserAlertDialog> {
                 'invitedAt': DateTime.now().toIso8601String(),
               });
 
-              await datasetRef.setData({
+              await datasetRef.set({
                 "collaborators": FieldValue.arrayUnion([emailId]),
-              }, merge: true);
+              }, SetOptions(merge: true));
             }
 
             Navigator.pop(context);

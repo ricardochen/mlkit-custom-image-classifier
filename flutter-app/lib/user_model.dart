@@ -20,7 +20,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class UserModel extends Model {
-  FirebaseUser _user;
+  User _user;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -47,33 +47,35 @@ class UserModel extends Model {
     print("Attempting silent sign in");
     GoogleSignInAccount googleUser = await _googleSignIn.signInSilently();
     if (googleUser != null) {
-      FirebaseUser user = await completeSignIn(googleUser);
+      User user = await completeSignIn(googleUser);
       setLoggedInUser(user);
     }
   }
 
-  void setLoggedInUser(FirebaseUser user) async {
+  void setLoggedInUser(User user) async {
     _user = user;
     notifyListeners();
   }
 
-  Future<FirebaseUser> completeSignIn(GoogleSignInAccount googleUser) async {
+  Future<User> completeSignIn(GoogleSignInAccount googleUser) async {
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
+    final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    FirebaseUser user = await _auth.signInWithCredential(credential);
+    UserCredential userCredential =
+        await _auth.signInWithCredential(credential);
+    User user = userCredential.user;
     print("signed in ${user.displayName} with id: ${user.uid}");
     return user;
   }
 
   /// begins the sign in flow
-  Future<FirebaseUser> beginSignIn() async {
+  Future<User> beginSignIn() async {
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     return completeSignIn(googleUser);
   }
 
-  FirebaseUser get user => _user;
+  User get user => _user;
 }
