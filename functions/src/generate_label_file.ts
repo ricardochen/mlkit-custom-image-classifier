@@ -62,6 +62,7 @@ async function generateLabel(dataset: string): Promise<String> {
 
   // get all images in the dataset
   const [files] = await storage.bucket(AUTOML_BUCKET).getFiles({ prefix });
+  // const [files] = await admin.storage().bucket().getFiles({ prefix });
 
   const csvRows = files
     .map(file => getMetadata(file.name))

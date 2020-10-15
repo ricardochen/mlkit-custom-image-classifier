@@ -102,6 +102,7 @@ async function importDataset(
       inputUris: [`${AUTOML_BUCKET_URL}/${displayName}/${labels}`],
     },
   };
+  console.log(inputConfig);
   return client
     .importData({ name, inputConfig })
     .then((responses: any[]) => responses[1]); // initial api response with operation metadata

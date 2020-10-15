@@ -48,7 +48,10 @@ Future deleteDatasetAsync(Dataset dataset) async {
   await AutoMLApi.deleteDataset(dataset.automlId);
 
   // then clear the firestore collection
-  await Firestore.instance.collection("datasets").document(dataset.id).delete();
+  await FirebaseFirestore.instance
+      .collection("datasets")
+      .doc(dataset.id)
+      .delete();
 
   // Fire off a request to delete the data from storage
   DatasetService.delete(dataset.name).then((result) {
@@ -393,14 +396,14 @@ class OperationProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder(
-        stream: Firestore.instance
+        stream: FirebaseFirestore.instance
             .collection('operations')
             .where('dataset_id', isEqualTo: dataset.automlId)
             .orderBy('last_updated', descending: true)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading operations'));
+            return Center(child: Text('No operations'));
           }
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

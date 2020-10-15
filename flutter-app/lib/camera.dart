@@ -214,13 +214,16 @@ class _CameraState extends State<Camera> {
           new DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
       print("stage 6");
       // upload to storage and firestore
-      final StorageReference ref = FirebaseStorage()
+      print(automlStorage.storageBucket);
+      final StorageReference ref = automlStorage
           .ref()
           .child('datasets')
           .child(widget.dataset.name)
           .child(widget.label)
           .child(filename);
       print("stage 7");
+      print(ref);
+      print("stage8");
       final File file = File(filePath).absolute;
       // upload the file
       StorageUploadTask uploadTask = ref.putFile(
@@ -230,11 +233,14 @@ class _CameraState extends State<Camera> {
           customMetadata: <String, String>{'activity': 'imgUpload'},
         ),
       );
-
+      print('stage 9');
       final snapshot = await uploadTask.onComplete;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print(snapshot.ref.path);
 
-      Firestore.instance.collection('images').add({
+      print('stage 10');
+      // final downloadUrl = await snapshot.ref.getDownloadURL();
+      final downloadUrl = "just testing";
+      FirebaseFirestore.instance.collection('images').add({
         'parent_key': widget.labelKey,
         'dataset_parent_key': widget.dataset.id,
         'type': toString(SampleType
@@ -278,7 +284,7 @@ class _CameraState extends State<Camera> {
           new DateTime.now().millisecondsSinceEpoch.toString() + ".mp4";
 
       // build the path in storage: videos/dataset_name>/<dataset_label>/filename
-      final StorageReference ref = FirebaseStorage()
+      final StorageReference ref = storage
           .ref()
           .child('videos')
           .child(widget.dataset.name)

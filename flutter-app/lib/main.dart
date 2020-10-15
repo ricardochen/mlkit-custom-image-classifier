@@ -58,8 +58,8 @@ class MyApp extends StatelessWidget {
     return ScopedModel<UserModel>(
       model: userModel,
       child: new InheritedStorage(
-        // storage: storage,
-        // autoMlStorage: autoMlStorage,
+        storage: storage,
+        autoMlStorage: autoMlStorage,
         child: new MaterialApp(
           title: 'Custom Image Classifier',
           theme: new ThemeData(

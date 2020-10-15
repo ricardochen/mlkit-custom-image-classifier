@@ -141,13 +141,14 @@ class Sample {
       this.thumbnailUri});
 
   static Sample fromDocument(DocumentSnapshot document) {
+    print(document.data());
     return Sample(
-        id: document.documentID,
+        id: document.id,
         filename: document['filename'],
         gcsURI: document['gcsURI'],
         type: fromStr(document["type"]),
         ownerEmail: document["uploader"],
-        thumbnailUri: document["thumbnailUri"]);
+        thumbnailUri: document["gcsURI"]);
   }
 
   bool isOwner(UserModel userModel) {

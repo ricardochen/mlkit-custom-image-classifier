@@ -52,9 +52,9 @@ class ListLabelSamples extends StatelessWidget {
                   IconButton(
                     icon: Icon(Icons.delete_forever),
                     onPressed: () {
-                      Firestore.instance
+                      FirebaseFirestore.instance
                           .collection('labels')
-                          .document(labelKey)
+                          .doc(labelKey)
                           .delete();
                       Navigator.pop(context);
                     },
@@ -82,7 +82,7 @@ class ListLabelSamples extends StatelessWidget {
             : Container(),
         // body of the screen
         body: new StreamBuilder(
-          stream: Firestore.instance
+          stream: FirebaseFirestore.instance
               .collection('images')
               .where("parent_key", isEqualTo: labelKey)
               .snapshots(),
@@ -95,7 +95,7 @@ class ListLabelSamples extends StatelessWidget {
               case ConnectionState.waiting:
                 return Center(child: CircularProgressIndicator());
               default:
-                if (snapshot.data.documents.isEmpty) {
+                if (snapshot.data.docs.isEmpty) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(50.0),
@@ -120,9 +120,9 @@ class ListLabelSamples extends StatelessWidget {
                     mainAxisSpacing: 4.0,
                     crossAxisSpacing: 4.0,
                   ),
-                  itemCount: snapshot.data.documents.length,
+                  itemCount: snapshot.data.docs.length,
                   itemBuilder: (context, i) {
-                    final document = snapshot.data.documents[i];
+                    final document = snapshot.data.docs[i];
                     final sample = Sample.fromDocument(document);
                     return new ImageEntry(
                       key: ValueKey(sample.gcsURI),

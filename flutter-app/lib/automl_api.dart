@@ -69,6 +69,7 @@ class AutoMLApi {
   /// projects/1042742261124/locations/us-central1/operations/ICN4156965867930410106
   static Future<String> importDataset(
       String datasetName, String automlId) async {
+    print("about to import");
     final response = await http.post(
       Uri.https(FUNCTIONS_URL, "$_AUTOMLAPI/import"),
       body: {
@@ -77,6 +78,7 @@ class AutoMLApi {
         "labels": "labels.csv"
       },
     );
+    print(response.body);
     if (response.statusCode == 200) {
       final Map body = jsonDecode(response.body);
       print("Got response" + body.toString());

@@ -35,8 +35,7 @@ const PROJECT_ID = "product-recognition-poc";
 const STORAGE_BUCKET = "gs://$PROJECT_ID.appspot.com";
 
 // AutoML bucket
-// const AUTOML_BUCKET = "gs://$PROJECT_ID-vcm";
-const AUTOML_BUCKET = "gs://$PROJECT_ID.appspot.com";
+const AUTOML_BUCKET = "gs://$PROJECT_ID-vcm";
 
 const DATA_QUALITY_MESSAGE =
     'Be sure to include a diverse set of at least 100 images for improved accuracy';

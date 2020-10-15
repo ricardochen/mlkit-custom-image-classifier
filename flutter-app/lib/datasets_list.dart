@@ -51,11 +51,11 @@ class DatasetsList extends StatelessWidget {
           case ConnectionState.waiting:
             return Center(child: new CircularProgressIndicator());
           default:
-            if (snapshot.data.documents.isEmpty) {
+            if (snapshot.data.docs.isEmpty) {
               return ZeroStateDatasets();
             }
 
-            final filteredDatasets = snapshot.data.documents
+            final filteredDatasets = snapshot.data.docs
                 .map(Dataset.fromDocument)
                 .where((dataset) =>
                     dataset.isPublic ||
@@ -66,7 +66,7 @@ class DatasetsList extends StatelessWidget {
               return ZeroStateDatasets();
             }
 
-            return new ListView(
+            return ListView(
                 children: filteredDatasets
                     .map(
                       (dataset) => new Container(
@@ -200,16 +200,16 @@ class DatasetActions extends StatelessWidget {
     String modelStatus = "No model available";
 
     return new StreamBuilder(
-      stream: Firestore.instance
+      stream: FirebaseFirestore.instance
           .collection("models")
           .where("dataset_id", isEqualTo: dataset.automlId)
           .orderBy("generated_at", descending: true)
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData) return new Text('Loading...');
+        // if (!snapshot.hasData) return new Text(modelStatus);
 
-        if (snapshot.data.documents.isNotEmpty) {
-          final modelInfo = snapshot.data.documents.first;
+        if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
+          final modelInfo = snapshot.data.docs.first;
           final generatedAt =
               DateTime.fromMillisecondsSinceEpoch(modelInfo["generated_at"]);
           final ago = timeago.format(generatedAt);
