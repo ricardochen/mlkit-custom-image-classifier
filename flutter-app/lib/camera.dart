@@ -112,7 +112,7 @@ class _CameraState extends State<Camera> {
                 ),
               ),
             ),
-            new CameraControlWidget(
+            CameraControlWidget(
               controller: controller,
               onRecordingStart: onVideoRecordButtonPressed,
               onRecordingStop: onStopButtonPressed,
@@ -198,25 +198,29 @@ class _CameraState extends State<Camera> {
   }
 
   void onTakePictureButtonPressed() async {
+    print("stage 1");
     final filePath = await takePicture();
+    print("stage 2");
     final automlStorage = InheritedStorage.of(context).autoMlStorage;
-
+    print("stage 3");
     if (mounted) {
+      print("stage 4");
       setState(() {
         imagePath = filePath;
       });
+      print("stage 5");
 
       final filename =
           new DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
-
+      print("stage 6");
       // upload to storage and firestore
-      final StorageReference ref = automlStorage
+      final StorageReference ref = FirebaseStorage()
           .ref()
           .child('datasets')
           .child(widget.dataset.name)
           .child(widget.label)
           .child(filename);
-
+      print("stage 7");
       final File file = File(filePath).absolute;
       // upload the file
       StorageUploadTask uploadTask = ref.putFile(
@@ -274,7 +278,7 @@ class _CameraState extends State<Camera> {
           new DateTime.now().millisecondsSinceEpoch.toString() + ".mp4";
 
       // build the path in storage: videos/dataset_name>/<dataset_label>/filename
-      final StorageReference ref = storage
+      final StorageReference ref = FirebaseStorage()
           .ref()
           .child('videos')
           .child(widget.dataset.name)
@@ -407,7 +411,10 @@ class _CameraControlWidgetState extends State<CameraControlWidget> {
   @override
   Widget build(BuildContext context) {
     final recordVideoButton = IconButton(
-      icon: Icon(Icons.videocam),
+      icon: Icon(
+        Icons.videocam,
+        color: Colors.white,
+      ),
       iconSize: 40,
       onPressed: () {
         widget.onRecordingStart();
@@ -419,7 +426,10 @@ class _CameraControlWidgetState extends State<CameraControlWidget> {
     );
 
     final takePictureButton = IconButton(
-      icon: Icon(Icons.camera_alt),
+      icon: Icon(
+        Icons.camera_alt,
+        color: Colors.white,
+      ),
       iconSize: 40,
       onPressed: widget.onPictureTaken,
     );

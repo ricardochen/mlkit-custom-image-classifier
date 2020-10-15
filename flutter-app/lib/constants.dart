@@ -29,13 +29,14 @@ const SHOW_VIDEO_TYPE_TOGGLES = false;
 
 // Path to the AutoML Bucket
 // TODO: Needs to be configured as a part of onboarding
-const PROJECT_ID = "";
+const PROJECT_ID = "product-recognition-poc";
 
 // Firebase bucket for storage
 const STORAGE_BUCKET = "gs://$PROJECT_ID.appspot.com";
 
 // AutoML bucket
-const AUTOML_BUCKET = "gs://$PROJECT_ID-vcm";
+// const AUTOML_BUCKET = "gs://$PROJECT_ID-vcm";
+const AUTOML_BUCKET = "gs://$PROJECT_ID.appspot.com";
 
 const DATA_QUALITY_MESSAGE =
     'Be sure to include a diverse set of at least 100 images for improved accuracy';

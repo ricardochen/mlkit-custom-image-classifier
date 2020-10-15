@@ -97,7 +97,7 @@ class _AddDatasetFormState extends State<AddDatasetForm> {
 
     final datasetId = await AutoMLApi.createDataset(title);
 
-    await Firestore.instance.collection('datasets').document().setData({
+    await FirebaseFirestore.instance.collection('datasets').doc().set({
       'automlId': datasetId,
       'name': title,
       'description': description,

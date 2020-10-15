@@ -28,13 +28,13 @@ import 'storage.dart';
 import 'user_model.dart';
 
 void main() async {
-  // final FirebaseStorage storage = await initStorage(STORAGE_BUCKET);
-  // final FirebaseStorage autoMlStorage = await initStorage(AUTOML_BUCKET);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  final FirebaseStorage storage = await initStorage(STORAGE_BUCKET);
+  final FirebaseStorage autoMlStorage = await initStorage(AUTOML_BUCKET);
   runApp(new MyApp(
-    // storage: storage,
-    // autoMlStorage: autoMlStorage,
+    storage: storage,
+    autoMlStorage: autoMlStorage,
     userModel: UserModel(),
   ));
 }
@@ -42,14 +42,14 @@ void main() async {
 enum MainAction { logout, viewTutorial }
 
 class MyApp extends StatelessWidget {
-  // final FirebaseStorage storage;
-  // final FirebaseStorage autoMlStorage;
+  final FirebaseStorage storage;
+  final FirebaseStorage autoMlStorage;
   final UserModel userModel;
 
   const MyApp({
     Key key,
-    // @required this.storage,
-    // @required this.autoMlStorage,
+    @required this.storage,
+    @required this.autoMlStorage,
     @required this.userModel,
   }) : super(key: key);
 
