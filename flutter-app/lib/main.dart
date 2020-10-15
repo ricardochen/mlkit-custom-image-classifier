@@ -30,8 +30,10 @@ import 'user_model.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  final FirebaseStorage storage = await initStorage(STORAGE_BUCKET);
-  final FirebaseStorage autoMlStorage = await initStorage(AUTOML_BUCKET);
+  final FirebaseStorage storage =
+      FirebaseStorage(storageBucket: STORAGE_BUCKET);
+  final FirebaseStorage autoMlStorage =
+      FirebaseStorage(storageBucket: AUTOML_BUCKET);
   runApp(new MyApp(
     storage: storage,
     autoMlStorage: autoMlStorage,

@@ -141,7 +141,6 @@ class Sample {
       this.thumbnailUri});
 
   static Sample fromDocument(DocumentSnapshot document) {
-    print(document.data());
     return Sample(
         id: document.id,
         filename: document['filename'],

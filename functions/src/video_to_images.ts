@@ -22,7 +22,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as rimraf from 'rimraf';
 import * as admin from 'firebase-admin';
-import { PROJECT_ID } from './constants';
+import { PROJECT_ID, AUTOML_BUCKET } from './constants';
 
 interface VideoMetadata {
   uploader: string;
@@ -100,8 +100,8 @@ export const videoToImages = functions.storage
   //     credential: admin.credential.cert(serviceAccount),
   //     storageBucket: "${PROJECT_ID}.appspot.com"
   // });
-    // const autoMlBucket = new Storage({ keyFilename }).bucket(AUTOML_BUCKET);
-    const autoMlBucket = admin.storage().bucket();
+    const autoMlBucket = admin.storage().bucket(AUTOML_BUCKET);
+    // const autoMlBucket = admin.storage().bucket();
     await uploadFolderToGCS(
       autoMlBucket,
       imgOutputDir,

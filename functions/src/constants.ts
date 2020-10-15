@@ -19,14 +19,14 @@ export const PROJECT_ID = process.env.GCLOUD_PROJECT;
 export const APP_NAME = 'Custom Image Classifier';
 
 // AutoML bucket name
-export const AUTOML_BUCKET = `${PROJECT_ID}-vcm`;
+export const AUTOML_BUCKET = `${PROJECT_ID}-ml`;
 //export const AUTOML_BUCKET = `${PROJECT_ID}.appspot.com`;
 
 // Location for the project
 export const LOCATION = 'us-central1';
 
 // AutoML bucket path
-export const AUTOML_BUCKET_URL = `gs://${PROJECT_ID}-vcm`;
+export const AUTOML_BUCKET_URL = `gs://${PROJECT_ID}-ml`;
 //export const AUTOML_BUCKET_URL = `gs://${PROJECT_ID}.appspot.com`;
 
 

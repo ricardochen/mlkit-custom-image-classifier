@@ -25,6 +25,7 @@ import 'countdown_timer.dart';
 import 'models.dart';
 import 'storage.dart';
 import 'user_model.dart';
+import 'constants.dart';
 
 List<CameraDescription> cameras;
 
@@ -202,6 +203,7 @@ class _CameraState extends State<Camera> {
     final filePath = await takePicture();
     print("stage 2");
     final automlStorage = InheritedStorage.of(context).autoMlStorage;
+    final storage = InheritedStorage.of(context).storage;
     print("stage 3");
     if (mounted) {
       print("stage 4");
@@ -214,6 +216,7 @@ class _CameraState extends State<Camera> {
           new DateTime.now().millisecondsSinceEpoch.toString() + '.jpg';
       print("stage 6");
       // upload to storage and firestore
+      print(storage.storageBucket);
       print(automlStorage.storageBucket);
       final StorageReference ref = automlStorage
           .ref()
@@ -234,12 +237,13 @@ class _CameraState extends State<Camera> {
         ),
       );
       print('stage 9');
+
       final snapshot = await uploadTask.onComplete;
       print(snapshot.ref.path);
-
       print('stage 10');
-      // final downloadUrl = await snapshot.ref.getDownloadURL();
-      final downloadUrl = "just testing";
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      print(downloadUrl);
+      // final downloadUrl = "just testing";
       FirebaseFirestore.instance.collection('images').add({
         'parent_key': widget.labelKey,
         'dataset_parent_key': widget.dataset.id,
