@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 // import 'package:automl_mlkit/automl_mlkit.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -303,22 +304,48 @@ class DatasetActions extends StatelessWidget {
     );
   }
 
-  Future loadModel(String dataset) async {
-    try {
-      // await AutomlMlkit.loadModelFromCache(dataset: dataset);
-      print("Model successfully loaded");
-    } on PlatformException catch (e) {
-      print("failed to load model");
-      print(e.toString());
-    }
-  }
+  // Future loadModel(String dataset) async {
+  //   try {
+  //     // await AutomlMlkit.loadModelFromCache(dataset: dataset);
+  //     print("Model successfully loaded");
+  //   } on PlatformException catch (e) {
+  //     print("failed to load model");
+  //     print(e.toString());
+  //   }
+  // }
 
   Future getImage() async {
-    return ImagePicker.pickImage(source: ImageSource.camera);
+    return ImagePicker.pickImage(source: ImageSource.gallery);
   }
 
   Future<List<dynamic>> recognizeImage(File image) async {
-    final results = await Tflite.runModelOnImage(path: image.path);
+    // sampleImage.readAsBytes()
+    // final results =
+    //     await Tflite.runModelOnBinary(binary: image.readAsBytesSync());
+    // final results = await Tflite.detectObjectOnImage(path: image.path);
+    print("recognize");
+    // final results = await Tflite.runModelOnImage(
+    //   path: image.path,
+    //   imageMean: 0.0, // defaults to 117.0
+    //   imageStd: 256.0, // defaults to 1.0
+    //   numResults: 5, // defaults to 5
+    //   threshold: 0.01, // defaults to 0.1
+    //   asynch: true,
+    // );
+    // Uint8List byteData = await image.readAsBytes();
+
+    // var results = await Tflite.runModelOnBinary(
+    //     binary: byteData, // required
+    //     threshold: 0.01, // defaults to 0.1
+    //     asynch: true // defaults to true
+    //     );
+    var results = await Tflite.runModelOnImage(
+      path: image.path,
+      numResults: 6,
+      threshold: 0.05,
+      imageMean: 127.5,
+      imageStd: 127.5,
+    );
     print(results);
     return results
         .map((result) => Inference.fromTfInference(result))
@@ -373,8 +400,10 @@ class DatasetActions extends StatelessWidget {
       print("model path: ${modelFile.path}");
       print("label path: ${labelsFile.path}");
       assert(await Tflite.loadModel(
-            model: "assets/model.tflite",
-            labels: "assets/dict.txt",
+            // model: "assets/model.tflite",
+            // labels: "assets/dict.txt",
+            model: "assets/mobilenet_v1_1.0_224.tflite",
+            labels: "assets/labels2.txt",
             // model: modelFile.path,
             // labels: labelsFile.path,
             isAsset: true,
