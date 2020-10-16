@@ -24,7 +24,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
+import 'package:firebase_ml_custom/firebase_ml_custom.dart';
+import 'package:tflite/tflite.dart';
 import 'labelscreen.dart';
 import 'models.dart';
 import 'storage.dart';
@@ -125,13 +126,13 @@ class DatasetActions extends StatelessWidget {
       _showSnackBar("Error downloading model");
       print(e);
     }
-    try {
-      await loadModel(dataset.automlId);
-      print("Successfully loaded the model");
-    } catch (e) {
-      _showSnackBar("Error loading the model");
-      print(e);
-    }
+    // try {
+    //   await loadModel(dataset.automlId);
+    //   print("Successfully loaded the model");
+    // } catch (e) {
+    //   _showSnackBar("Error loading the model");
+    //   print(e);
+    // }
     await _getImageAndRunInferenceAsync(context);
   }
 
@@ -317,86 +318,153 @@ class DatasetActions extends StatelessWidget {
   }
 
   Future<List<dynamic>> recognizeImage(File image) async {
-    // final results = await AutomlMlkit.runModelOnImage(imagePath: image.path);
-    // return results
-    //     .map((result) => Inference.fromTfInference(result))
-    //     .where((i) => i != null)
-    //     .toList();
+    final results = await Tflite.runModelOnImage(path: image.path);
+    print(results);
+    return results
+        .map((result) => Inference.fromTfInference(result))
+        .where((i) => i != null)
+        .toList();
+  }
+
+  /// Downloads custom model from the Firebase console and return its file.
+  /// located on the mobile device.
+  static Future<File> loadModelFromFirebase(String modelName) async {
+    try {
+      // Create model with a name that is specified in the Firebase console
+      final model = FirebaseCustomRemoteModel(modelName);
+
+      // Specify conditions when the model can be downloaded.
+      // If there is no wifi access when the app is started,
+      // this app will continue loading until the conditions are satisfied.
+      final conditions = FirebaseModelDownloadConditions(
+          androidRequireWifi: false, iosAllowCellularAccess: true);
+
+      // Create model manager associated with default Firebase App instance.
+      final modelManager = FirebaseModelManager.instance;
+
+      // Begin downloading and wait until the model is downloaded successfully.
+      await modelManager.download(model, conditions);
+      assert(await modelManager.isModelDownloaded(model) == true);
+
+      // Get latest model file to use it for inference by the interpreter.
+      var modelFile = await modelManager.getLatestModelFile(model);
+      assert(modelFile != null);
+      return modelFile;
+    } catch (exception) {
+      print('Failed on loading your model from Firebase: $exception');
+      print('The program will not be resumed');
+      rethrow;
+    }
+  }
+
+  /// Loads the model into some TF Lite interpreter.
+  /// In this case interpreter provided by tflite plugin.
+  static Future<String> loadTFLiteModel(
+      File modelFile, String modelName) async {
+    try {
+      final appDirectory = await getApplicationDocumentsDirectory();
+      // final labelsData = await rootBundle.load("assets/labels_$modelName.txt");
+      final labelsData = await rootBundle.load("assets/dict.txt");
+      final labelsFile =
+          // await File(appDirectory.path + "/_labels_$modelName.txt")
+          await File(appDirectory.path + "/_dict.txt").writeAsBytes(labelsData
+              .buffer
+              .asUint8List(labelsData.offsetInBytes, labelsData.lengthInBytes));
+      print("model path: ${modelFile.path}");
+      print("label path: ${labelsFile.path}");
+      assert(await Tflite.loadModel(
+            model: "assets/model.tflite",
+            labels: "assets/dict.txt",
+            // model: modelFile.path,
+            // labels: labelsFile.path,
+            isAsset: true,
+          ) ==
+          "success");
+      return "Model is loaded";
+    } catch (exception) {
+      print(
+          'Failed on loading your model to the TFLite interpreter: $exception');
+      print('The program will not be resumed');
+      rethrow;
+    }
   }
 
   /// downloads the latest model for the given dataset from storage and saves
   /// it in system's temp directory
-  Future<List<DownloadedModelInfo>> _downloadModel(
-      Dataset dataset, FirebaseStorage autoMlStorage) async {
-    final QuerySnapshot snapshot = await Firestore.instance
+  Future _downloadModel(Dataset dataset, FirebaseStorage autoMlStorage) async {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection("models")
         .where("dataset_id", isEqualTo: dataset.automlId)
         .orderBy("generated_at", descending: true)
-        .getDocuments();
+        .get();
 
     // reference to the latest model
-    final modelInfo = snapshot.documents.first;
+    final modelInfo = snapshot.docs.first;
+    print("downloading model ${modelInfo['name']}");
+    final modelFile = await loadModelFromFirebase(modelInfo['name']);
+    await loadTFLiteModel(modelFile, modelInfo['name']);
+    return;
 
-    final filesToDownload = {
-      modelInfo["model"]: "model.tflite",
-      modelInfo["label"]: "dict.txt",
-    };
+    // final filesToDownload = {
+    //   modelInfo["model"]: "model.tflite",
+    //   modelInfo["label"]: "dict.txt",
+    // };
 
-    final int generatedAt = modelInfo["generated_at"];
+    // final int generatedAt = modelInfo["generated_at"];
 
-    // create a datasets dir in app's data folder
-    final Directory appDocDir = await getTemporaryDirectory();
-    final Directory modelDir =
-        Directory("${appDocDir.path}/${dataset.automlId}");
-    print("Using dir ${modelDir.path} for storing models");
+    // // create a datasets dir in app's data folder
+    // final Directory appDocDir = await getTemporaryDirectory();
+    // final Directory modelDir =
+    //     Directory("${appDocDir.path}/${dataset.automlId}");
+    // print("Using dir ${modelDir.path} for storing models");
 
-    if (!modelDir.existsSync()) {
-      modelDir.createSync();
-    }
+    // if (!modelDir.existsSync()) {
+    //   modelDir.createSync();
+    // }
 
-    // write a manifest.json for MLKit SDK
-    final File manifestJsonFile = File('${modelDir.path}/manifest.json');
-    if (!manifestJsonFile.existsSync()) {
-      manifestJsonFile.writeAsString(jsonEncode(MANIFEST_JSON_CONTENTS));
-    }
-    // stores the timestamp at which the latest model was generated
-    final File generatedAtFile = File('${modelDir.path}/generated_at');
-    if (!generatedAtFile.existsSync()) {
-      generatedAtFile.writeAsStringSync(modelInfo["generated_at"].toString());
-    } else {
-      // if the timestamp file exists, compare the timestamps to decide if the
-      // model should be downloaded again.
-      final storedTimestamp = int.parse(generatedAtFile.readAsStringSync());
-      if (storedTimestamp >= generatedAt) {
-        // newer (or same) model is stored, no need to download it again.
-        print("[DatasetsList] Using cached model");
-        return Future.value();
-      }
-    }
+    // // write a manifest.json for MLKit SDK
+    // final File manifestJsonFile = File('${modelDir.path}/manifest.json');
+    // if (!manifestJsonFile.existsSync()) {
+    //   manifestJsonFile.writeAsString(jsonEncode(MANIFEST_JSON_CONTENTS));
+    // }
+    // // stores the timestamp at which the latest model was generated
+    // final File generatedAtFile = File('${modelDir.path}/generated_at');
+    // if (!generatedAtFile.existsSync()) {
+    //   generatedAtFile.writeAsStringSync(modelInfo["generated_at"].toString());
+    // } else {
+    //   // if the timestamp file exists, compare the timestamps to decide if the
+    //   // model should be downloaded again.
+    //   final storedTimestamp = int.parse(generatedAtFile.readAsStringSync());
+    //   if (storedTimestamp >= generatedAt) {
+    //     // newer (or same) model is stored, no need to download it again.
+    //     print("[DatasetsList] Using cached model");
+    //     return Future.value();
+    //   }
+    // }
 
-    // TODO: This will be replaced by the ML Kit Model Publishing API when it becomes available.
-    final downloadFutures = filesToDownload.keys.map((filename) async {
-      final outputFilename = filesToDownload[filename];
-      print(
-          "[DatasetsList] Attempting to download $filename at $outputFilename");
+    // // TODO: This will be replaced by the ML Kit Model Publishing API when it becomes available.
+    // final downloadFutures = filesToDownload.keys.map((filename) async {
+    //   final outputFilename = filesToDownload[filename];
+    //   print(
+    //       "[DatasetsList] Attempting to download $filename at $outputFilename");
 
-      final ref = autoMlStorage.ref().child("/$filename");
+    //   final ref = autoMlStorage.ref().child("/$filename");
 
-      // store model
-      final File tempFile = File('${modelDir.path}/$outputFilename');
-      if (tempFile.existsSync()) {
-        await tempFile.delete();
-      }
-      await tempFile.create();
+    //   // store model
+    //   final File tempFile = File('${modelDir.path}/$outputFilename');
+    //   if (tempFile.existsSync()) {
+    //     await tempFile.delete();
+    //   }
+    //   await tempFile.create();
 
-      final StorageFileDownloadTask task = ref.writeToFile(tempFile);
+    //   final StorageFileDownloadTask task = ref.writeToFile(tempFile);
 
-      // return bytes downloaded
-      final int byteCount = (await task.future).totalByteCount;
-      return DownloadedModelInfo(tempFile.path, byteCount);
-    }).toList();
+    //   // return bytes downloaded
+    //   final int byteCount = (await task.future).totalByteCount;
+    //   return DownloadedModelInfo(tempFile.path, byteCount);
+    // }).toList();
 
-    return Future.wait(downloadFutures);
+    // return Future.wait(downloadFutures);
   }
 }
 

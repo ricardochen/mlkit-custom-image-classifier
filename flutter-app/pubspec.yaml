@@ -41,7 +41,10 @@ dependencies:
   intro_slider: ^1.2.0
   url_launcher: ^5.0.2
   shared_preferences: ^0.5.12
-  firebase_ml_vision: ^0.9.7    
+  #firebase_ml_vision: ^0.9.7    
+  firebase_ml_custom:
+    path: ../firebase_ml_custom/
+  tflite: ^1.1.1
   firebase_auth: ^0.18.1
   firebase_storage: ^4.0.1 
   firebase_messaging: ^7.0.3
@@ -72,6 +75,9 @@ flutter:
   #  - images/a_dot_ham.jpeg
   assets:
     - assets/labels.txt
+    - assets/dict.txt
+    - assets/model.tflite
+    - assets/mylabels.txt
     - assets/mobilenet_v1_1.0_224.tflite
     - images/
 
