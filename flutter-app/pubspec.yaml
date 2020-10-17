@@ -45,6 +45,7 @@ dependencies:
   firebase_ml_custom:
     path: ../firebase_ml_custom/ 
   tflite: ^1.1.1
+  image: ^2.1.18
   #tflite_flutter: ^0.5.0
   firebase_auth: ^0.18.1
   firebase_storage: ^4.0.1 

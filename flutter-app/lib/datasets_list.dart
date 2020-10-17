@@ -27,6 +27,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:firebase_ml_custom/firebase_ml_custom.dart';
 import 'package:tflite/tflite.dart';
+import 'package:image/image.dart' as img;
 import 'labelscreen.dart';
 import 'models.dart';
 import 'storage.dart';
@@ -318,12 +319,41 @@ class DatasetActions extends StatelessWidget {
     return ImagePicker.pickImage(source: ImageSource.gallery);
   }
 
+  Uint8List imageToByteListUint8(img.Image image, int inputSize) {
+    print("entro1");
+    var convertedBytes = Uint8List(1 * inputSize * inputSize * 3);
+    var buffer = Uint8List.view(convertedBytes.buffer);
+    int pixelIndex = 0;
+    for (var i = 0; i < inputSize; i++) {
+      for (var j = 0; j < inputSize; j++) {
+        var pixel = image.getPixel(j, i);
+        buffer[pixelIndex++] = img.getRed(pixel);
+        buffer[pixelIndex++] = img.getGreen(pixel);
+        buffer[pixelIndex++] = img.getBlue(pixel);
+      }
+    }
+    print("entro2");
+    return convertedBytes.buffer.asUint8List();
+  }
+
   Future<List<dynamic>> recognizeImage(File image) async {
     // sampleImage.readAsBytes()
     // final results =
     //     await Tflite.runModelOnBinary(binary: image.readAsBytesSync());
     // final results = await Tflite.detectObjectOnImage(path: image.path);
     print("recognize");
+    var imageBytes = (await rootBundle.load(image.path)).buffer;
+    print("recognize2");
+    img.Image oriImage = img.decodeJpg(imageBytes.asUint8List());
+    print("recognize3");
+    img.Image resizedImage = img.copyResize(oriImage, height: 244, width: 244);
+    print("recognize4");
+
+    var results = await Tflite.detectObjectOnBinary(
+      binary: imageToByteListUint8(resizedImage, 224),
+      numResultsPerClass: 1,
+    );
+    print("recognize5");
     // final results = await Tflite.runModelOnImage(
     //   path: image.path,
     //   imageMean: 0.0, // defaults to 117.0
@@ -339,13 +369,13 @@ class DatasetActions extends StatelessWidget {
     //     threshold: 0.01, // defaults to 0.1
     //     asynch: true // defaults to true
     //     );
-    var results = await Tflite.runModelOnImage(
-      path: image.path,
-      numResults: 6,
-      threshold: 0.05,
-      imageMean: 127.5,
-      imageStd: 127.5,
-    );
+    // var results = await Tflite.runModelOnImage(
+    //   path: image.path,
+    //   numResults: 6,
+    //   threshold: 0.05,
+    //   imageMean: 127.5,
+    //   imageStd: 127.5,
+    // );
     print(results);
     return results
         .map((result) => Inference.fromTfInference(result))
