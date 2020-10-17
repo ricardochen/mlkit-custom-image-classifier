@@ -402,11 +402,11 @@ class DatasetActions extends StatelessWidget {
       assert(await Tflite.loadModel(
             // model: "assets/model.tflite",
             // labels: "assets/dict.txt",
-            model: "assets/mobilenet_v1_1.0_224.tflite",
-            labels: "assets/labels2.txt",
-            // model: modelFile.path,
-            // labels: labelsFile.path,
-            isAsset: true,
+            // model: "assets/mobilenet_v1_1.0_224.tflite",
+            // labels: "assets/labels2.txt",
+            model: modelFile.path,
+            labels: labelsFile.path,
+            isAsset: false,
           ) ==
           "success");
       return "Model is loaded";
